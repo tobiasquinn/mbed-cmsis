@@ -48,6 +48,9 @@ clean:
 	$(REMOVE) $(PROJECT).bin
 	$(REMOVE) *.lst
 
+install: $(PROJECT).hex
+	./lpc21isp $(PROJECT).hex -control -controlswap /dev/ttyUSB0 57600 12000
+
 #########################################################################
 #  Default rules to compile .c and .cpp file to .o
 #  and assemble .s files to .o
