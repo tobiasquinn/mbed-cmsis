@@ -28,10 +28,7 @@
  * To see how the LEDs are connected, refer to:
  * http://mbed.org/projects/libraries/svn/mbed/trunk/PinNames.h
  */
-#define LED1 	(1<<18)		/* LED1 = P1_18 */
-#define LED2 	(1<<20)		/* LED2 = P1_20 */
-#define LED3 	(1<<21)		/* LED3 = P1_21 */
-#define LED4 	(1<<23)		/* LED4 = P1_23 */
+#define LED1 	(1<<22)		/* LED1 = P0_22 */
 
 volatile uint32_t msTicks;		/* counts 1ms timeTicks */
 
@@ -56,14 +53,14 @@ __INLINE static void Delay (uint32_t dlyTicks) {
   configer LED pins
  *------------------------------------------------------------------------------*/
 __INLINE static void LED_Config(void) {
-	LPC_GPIO1->FIODIR = (LED1 | LED2 | LED3 | LED4);	/* LEDs PORT1 are Output */
+	LPC_GPIO0->FIODIR = (LED1);	/* LED1 PORT0 as Output */
 }
 
 /*------------------------------------------------------------------------------
   Switch on LEDs
  *------------------------------------------------------------------------------*/
 __INLINE static void LED_On (uint32_t led) {
-	LPC_GPIO1->FIOPIN |=  (led);		/* Turn On LED */
+	LPC_GPIO0->FIOPIN |=  (led);		/* Turn On LED */
 }
 
 
@@ -71,7 +68,7 @@ __INLINE static void LED_On (uint32_t led) {
   Switch off LEDs
  *------------------------------------------------------------------------------*/
 __INLINE static void LED_Off (uint32_t led) {
-	LPC_GPIO1->FIOPIN &= ~(led);		/* Turn Off LED */
+	LPC_GPIO0->FIOPIN &= ~(led);		/* Turn Off LED */
 }
 
 /*----------------------------------------------------------------------------
