@@ -50,6 +50,8 @@ clean:
 
 install: $(PROJECT).hex
 	./lpc21isp $(PROJECT).hex -control -controlswap /dev/ttyUSB0 57600 12000
+term:
+	./lpc21isp -control -controlswap -termonly build/$(PROJECT).hex /dev/ttyUSB0 115200 12000
 
 #########################################################################
 #  Default rules to compile .c and .cpp file to .o

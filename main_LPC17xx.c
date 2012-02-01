@@ -71,6 +71,67 @@ __INLINE static void LED_Off (uint32_t led) {
 	LPC_GPIO0->FIOPIN &= ~(led);		/* Turn Off LED */
 }
 
+// PCUART0
+#define PCUART0_POWERON (1 << 3)
+
+#define PCLK_UART0 6
+#define PCLK_UART0_MASK (3 << 6)
+#define LSR_THRE	0x20
+#define LSR_RDR		0x01
+
+// Function to set up UART
+void UART0_Init(int cclk, int baudrate)
+{
+	unsigned long int Fdiv;
+
+	// Turn on power to UART0
+	LPC_SC->PCONP |=  PCUART0_POWERON;
+		
+	// Turn on UART0 peripheral clock
+	LPC_SC->PCLKSEL0 &= ~(PCLK_UART0_MASK);
+	LPC_SC->PCLKSEL0 |=  (0 << PCLK_UART0);		// PCLK_periph = CCLK/4
+	
+	// Set PINSEL0 so that P0.2 = TXD0, P0.3 = RXD0
+	LPC_PINCON->PINSEL0 = (LPC_PINCON->PINSEL0 & ~0xf0) | (1 << 4) | (1 << 6);
+	
+    LPC_UART0->LCR = 0x83;		// 8 bits, no Parity, 1 Stop bit, DLAB=1
+    Fdiv = ( cclk / 16 ) / baudrate ;	// Set baud rate
+    LPC_UART0->DLM = Fdiv / 256;							
+    LPC_UART0->DLL = Fdiv % 256;
+	LPC_UART0->LCR = 0x03;		// 8 bits, no Parity, 1 Stop bit DLAB = 0
+    LPC_UART0->FCR = 0x07;		// Enable and reset TX and RX FIFO
+}
+
+
+// Function to send character over UART
+void UART0_Sendchar(char c)
+{
+	while( (LPC_UART0->LSR & LSR_THRE) == 0 );	// Block until tx empty
+	
+	LPC_UART0->THR = c;
+}
+
+
+// Function to get character from UART
+char UART0_Getchar()
+{
+	char c;
+	while( (LPC_UART0->LSR & LSR_RDR) == 0 );  // Nothing received so just block 	
+	c = LPC_UART0->RBR; // Read Receiver buffer register
+	return c;
+}
+
+// Function to prints the string out over the UART
+void UART_PrintString(char *pcString)
+{
+	int i = 0;
+	// loop through until reach string's zero terminator
+	while (pcString[i] != 0) {	
+		UART0_Sendchar(pcString[i]); // print each character
+		i++;
+	}
+}
+
 /*----------------------------------------------------------------------------
   MAIN function
  *----------------------------------------------------------------------------*/
@@ -83,12 +144,15 @@ int main (void) {
 	}
 
 	LED_Config();
+	UART0_Init(96000000/4, 115200); // Setup UART to 115200 baud
 
 	while(1) {
+        UART_PrintString("test\r\n");
 		LED_On(LED1);			/* Turn on the LED */
-		Delay(100);			/* Delay 100 Msec */
+		Delay(1000);			/* Delay 100 Msec */
+        UART_PrintString("toast\r\n");
 		LED_Off(LED1);			/* Turn off the LED */
-		Delay(100);			/* Delay 100 Msec */
+		Delay(1000);			/* Delay 100 Msec */
 	}
 }
 
