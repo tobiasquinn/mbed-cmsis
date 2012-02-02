@@ -146,6 +146,12 @@ int main (void) {
 	LED_Config();
 	UART0_Init(96000000/4, 115200); // Setup UART to 115200 baud
 
+    char c;
+    while(1) {
+        c = UART0_Getchar();
+        UART0_Sendchar(c);
+    }
+
 	while(1) {
         UART_PrintString("test\r\n");
 		LED_On(LED1);			/* Turn on the LED */
